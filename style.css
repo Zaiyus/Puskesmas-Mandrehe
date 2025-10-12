@@ -434,6 +434,14 @@ body {
     vertical-align: middle;
 }
 
+/* Tambahkan style untuk kolom Nomor Urut (No) */
+#data-table th:nth-child(1), 
+#data-table td:nth-child(1) {
+    text-align: center; 
+    min-width: 40px; 
+}
+
+
 #data-table th {
     background-color: #F4F6F6; 
     font-weight: 700;
