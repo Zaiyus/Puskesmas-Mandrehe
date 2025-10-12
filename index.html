@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Indikator Kinerja Puskesmas</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "GANTI_DENGAN_API_KEY_ANDA",
+            authDomain: "GANTI_DENGAN_AUTH_DOMAIN_ANDA",
+            projectId: "GANTI_DENGAN_PROJECT_ID_ANDA",
+            storageBucket: "GANTI_DENGAN_STORAGE_BUCKET_ANDA",
+            messagingSenderId: "GANTI_DENGAN_MESSAGING_SENDER_ID_ANDA",
+            appId: "GANTI_DENGAN_APP_ID_ANDA"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = app.auth();
+        const db = app.firestore(); // Inisialisasi Cloud Firestore
+    </script>
+    </head>
+<body>
+    <div class="header">
+        <h1>Dashboard Indikator Kinerja Puskesmas Mandrehe</h1>
+        <p>Berdasarkan Klaster ILP (Permenkes 19/2024)</p>
+        <p>Dibuat Oleh : Yusmar Christianto Zai, S.Kep.,Ns.</p>
+        <button id="logout-btn" class="btn-primary" style="display: none; margin-top: 15px; background-color: var(--color-danger);" onclick="logoutUser()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </div>
+
+    <div class="auth-section" id="authSection">
+        <div class="auth-box">
+            <h3><i class="fas fa-lock"></i> Akses Dashboard</h3>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" class="btn-primary" id="btn-login"><i class="fas fa-sign-in-alt"></i> Login</button>
+                <button type="button" class="btn-primary" id="btn-show-register" style="background-color: var(--color-purple); margin-top: 10px;"><i class="fas fa-user-plus"></i> Buat Akun</button>
+            </form>
+            
+            <form id="register-form" style="display: none;">
+                <h4><i class="fas fa-user-plus"></i> Register Akun Baru</h4>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password (min 6 karakter)" required>
+                <button type="submit" class="btn-primary"><i class="fas fa-user-plus"></i> Register & Login</button>
+                <button type="button" class="btn-primary" id="btn-show-login" style="background-color: var(--color-info); margin-top: 10px;">Kembali ke Login</button>
+            </form>
+            <p id="auth-error" style="color: var(--color-danger); margin-top: 10px;"></p>
+        </div>
+    </div>
+    <div class="container content-hidden" id="mainContainer"> 
+        <div class="controls-bar">
+            <div class="control-group">
+                <label for="select-tahun"><i class="fas fa-calendar-alt"></i> Tahun:</label>
+                <select id="select-tahun" onchange="changePeriod()"></select>
+            </div>
+            <div class="control-group">
+                <label for="select-bulan"><i class="fas fa-calendar-day"></i> Bulan:</label>
+                <select id="select-bulan" onchange="changePeriod()"></select>
+            </div>
+            <div class="control-group">
+                <label for="select-unit"><i class="fas fa-chart-line"></i> Tampilan:</label>
+                <select id="select-unit" onchange="changeUnitDisplay()">
+                    <option value="raw">Nilai Mentah</option>
+                    <option value="persen">Nilai Persentase (%)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="summary-cards" id="summaryCards">
+            </div>
+
+        <div class="input-form-section">
+            <div class="form-title">
+                <h2><i class="fas fa-tasks"></i> Input Capaian Bulanan</h2>
+                <span id="input-period-display" class="display-badge">Periode: -</span>
+            </div>
+            <form id="capaian-form">
+                <div class="input-group">
+                    <label for="select-indikator-capaian">Indikator:</label>
+                    <select id="select-indikator-capaian" required>
+                        <option value="">Pilih Indikator</option>
+                        </select>
+                </div>
+                <div class="input-group">
+                    <label for="input-capaian-num">Pembilang (Numerator):</label>
+                    <input type="number" step="any" id="input-capaian-num" placeholder="Angka Capaian">
+                </div>
+                <div class="input-group">
+                    <label for="input-capaian-den">Penyebut (Denominator):</label>
+                    <input type="number" step="any" id="input-capaian-den" placeholder="Angka Target Populasi (Opsional)">
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Simpan Capaian</button>
+            </form>
+        </div>
+
+        <div class="input-form-section">
+            <div class="form-title">
+                <h2><i class="fas fa-plus-circle"></i> Tambah Indikator Baru</h2>
+            </div>
+            <form id="add-indicator-form">
+                <div class="input-group">
+                    <label for="add-nama">Nama Indikator:</label>
+                    <input type="text" id="add-nama" placeholder="Cth: Angka Kematian Ibu (AKI)" required>
+                </div>
+                <div class="input-group">
+                    <label for="add-klaster">Klaster:</label>
+                    <select id="add-klaster" required>
+                        <option value="1">Klaster 1: MANAJEMEN</option>
+                        <option value="2">Klaster 2: IBU DAN ANAK</option>
+                        <option value="3">Klaster 3: DEWASA DAN LANSIA</option>
+                        <option value="4">Klaster 4: P2M & KESLING</option>
+                        <option value="5">Klaster 5: LINTAS KLASTER</option>
+                    </select>
+                </div>
+                <div class="input-group input-group-small">
+                    <div>
+                        <label for="add-target">Target:</label>
+                        <input type="number" step="any" id="add-target" placeholder="Cth: 100" required>
+                    </div>
+                    <div>
+                        <label for="add-satuan">Satuan:</label>
+                        <select id="add-satuan" required>
+                            <option value="%">% (Persen)</option>
+                            <option value="‰">‰ (Permil)</option>
+                            <option value="/100.000">/100.000 (Rate)</option>
+                            <option value="raw">Nilai Mentah</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="add-direction">Arah:</label>
+                        <select id="add-direction" required>
+                            <option value="up">Semakin Tinggi Semakin Baik</option>
+                            <option value="down">Semakin Rendah Semakin Baik</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary" style="background-color: var(--color-secondary);"><i class="fas fa-plus"></i> Tambah Indikator</button>
+            </form>
+        </div>
+
+        <div class="chart-section">
+            <h2 id="detail-indicator-name"><i class="fas fa-chart-area"></i> Pilih Indikator di Tabel Bawah</h2>
+            <div class="detail-info">
+                <span id="detail-current-capaian" class="display-badge">Capaian Saat Ini: -</span>
+                <span id="detail-current-status" class="display-badge status-badge good">Status: -</span>
+                <span id="detail-current-target" class="display-badge target-badge">Target: -</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="detailChart"></canvas>
+            </div>
+            <button id="download-chart-btn" class="btn-primary" style="display: none; background-color: var(--color-info); margin-top: 15px;"><i class="fas fa-download"></i> Unduh Grafik (PNG)</button>
+        </div>
+        
+        <div class="data-table-container" id="main-data-table-section">
+            <h3><i class="fas fa-list-alt"></i> Daftar Indikator (Edit Langsung di Tabel)</h3>
+            <div class="table-controls">
+                <label for="filter-klaster-table">Filter Klaster:</label>
+                <select id="filter-klaster-table" onchange="renderDetailTable()">
+                    <option value="0">Semua Klaster</option>
+                    <option value="1">Klaster 1: MANAJEMEN</option>
+                    <option value="2">Klaster 2: IBU DAN ANAK</option>
+                    <option value="3">Klaster 3: DEWASA DAN LANSIA</option>
+                    <option value="4">Klaster 4: P2M & KESLING</option>
+                    <option value="5">Klaster 5: LINTAS KLASTER</option>
+                </select>
+            </div>
+            <table id="data-table">
+                </table>
+            <p style="margin-top: 15px; font-style: italic; color: var(--color-text-medium); font-size: 0.9em;">* Klik atau ubah langsung pada kolom yang berwarna putih (Indikator Kinerja) atau pada input/dropdown di kolom Target, Satuan, Arah, dan Klaster untuk melakukan editing.</p>
+        </div>
+    </div>
+    
+    <div id="modal-trend" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h4><i class="fas fa-history"></i> Riwayat Capaian</h4>
+            <table id="trend-table">
+                <thead>
+                    <tr>
+                        <th>Tahun</th>
+                        <th>Bulan</th>
+                        <th>Pembilang</th>
+                        <th>Penyebut</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal-move" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h4><i class="fas fa-arrows-alt"></i> Pindahkan Indikator</h4>
+            <p>Pindahkan indikator **<span id="move-indicator-name"></span>** ke klaster:</p>
+            <select id="move-klaster-select">
+                <option value="1">Klaster 1: MANAJEMEN</option>
+                <option value="2">Klaster 2: IBU DAN ANAK</option>
+                <option value="3">Klaster 3: DEWASA DAN LANSIA</option>
+                <option value="4">Klaster 4: P2M & KESLING</option>
+                <option value="5">Klaster 5: LINTAS KLASTER</option>
+            </select>
+            <button class="btn-primary" style="background-color: var(--color-purple); margin-top: 15px;" onclick="confirmMove()"><i class="fas fa-check"></i> Konfirmasi Pindah</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
