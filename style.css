@@ -20,7 +20,7 @@
 }
 
 /* ==============================================
-   ANIMASI ENTRANCE HALUS (FIGMA-LIKE)
+   ANIMASI ENTRANCE HALUS
    ============================================== */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -28,7 +28,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', sans-serif; /* Menggunakan font Inter yang diimport di HTML */
     margin: 0;
     padding: 0;
     background-color: var(--color-background);
@@ -158,14 +158,14 @@ body {
     font-size: 1em;
     background-color: #FDFEFE;
     transition: all var(--transition-speed);
-    -webkit-appearance: none; /* Bersihkan style default browser */
+    -webkit-appearance: none; 
     -moz-appearance: none;
     appearance: none;
 }
 
 .controls-bar select:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); /* Ring Fokus Khas Figma */
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); 
     outline: none;
 }
 
@@ -377,9 +377,9 @@ body {
 
 /* PERBAIKAN GRAFIK SEMPIT */
 .chart-container {
-    height: 550px; /* Ditingkatkan dari 500px */
+    height: 550px; 
     margin-top: 20px;
-    padding: 0 15px; /* Tambahkan padding horizontal agar grafik bernapas */
+    padding: 0 15px; 
     position: relative;
 }
 
@@ -480,12 +480,12 @@ body {
     background-color: #fff;
     font-size: 1em;
     transition: border-color 0.2s;
-    outline: none; /* Hilangkan outline default */
+    outline: none; 
 }
 
 .editable-input:focus, .editable-select:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.2); /* Ring Fokus yang serasi */
+    box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.2); 
 }
 
 /* MODIFIKASI: Stacking input untuk Num/Den di Tabel */
@@ -602,6 +602,6 @@ body {
         min-width: auto;
     }
     .chart-container {
-        height: 350px; /* Penyesuaian untuk layar kecil */
+        height: 350px; 
     }
 }
