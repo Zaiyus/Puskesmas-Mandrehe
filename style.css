@@ -20,7 +20,7 @@
 }
 
 /* ==============================================
-   ANIMASI ENTRANCE HALUS
+   ANIMASI ENTRANCE HALUS (FIGMA-LIKE)
    ============================================== */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -28,7 +28,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif; /* Menggunakan font Inter yang diimport di HTML */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
     background-color: var(--color-background);
@@ -36,47 +36,6 @@ body {
     line-height: 1.6;
 }
 
-/* Penambahan Style untuk Auth Section */
-.auth-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh;
-    padding: 20px;
-    animation: fadeIn 0.8s ease-out forwards;
-}
-
-.auth-box {
-    background-color: var(--color-card-bg);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-medium);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
-}
-
-.auth-box h3, .auth-box h4 {
-    color: var(--color-primary);
-    margin-bottom: 25px;
-    font-size: 1.6em;
-}
-
-#login-form input, #register-form input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #D5DBDB;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
-
-/* Kelas untuk menyembunyikan konten utama sebelum login */
-.content-hidden {
-    display: none !important;
-}
-
-/* Lanjutkan dengan style dashboard yang sudah ada */
 .header {
     background-color: var(--color-primary); 
     color: white;
@@ -84,6 +43,7 @@ body {
     text-align: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
     margin-bottom: 20px;
+    /* Animasikan Header juga */
     animation: fadeIn 0.8s ease-out forwards;
 }
 
@@ -158,14 +118,14 @@ body {
     font-size: 1em;
     background-color: #FDFEFE;
     transition: all var(--transition-speed);
-    -webkit-appearance: none; 
+    -webkit-appearance: none; /* Bersihkan style default browser */
     -moz-appearance: none;
     appearance: none;
 }
 
 .controls-bar select:focus {
     border-color: var(--color-secondary);
-    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); 
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); /* Ring Fokus Khas Figma */
     outline: none;
 }
 
@@ -377,9 +337,9 @@ body {
 
 /* PERBAIKAN GRAFIK SEMPIT */
 .chart-container {
-    height: 550px; 
+    height: 550px; /* Ditingkatkan dari 500px */
     margin-top: 20px;
-    padding: 0 15px; 
+    padding: 0 15px; /* Tambahkan padding horizontal agar grafik bernapas */
     position: relative;
 }
 
@@ -480,12 +440,12 @@ body {
     background-color: #fff;
     font-size: 1em;
     transition: border-color 0.2s;
-    outline: none; 
+    outline: none; /* Hilangkan outline default */
 }
 
 .editable-input:focus, .editable-select:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.2); 
+    box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.2); /* Ring Fokus yang serasi */
 }
 
 /* MODIFIKASI: Stacking input untuk Num/Den di Tabel */
@@ -602,6 +562,6 @@ body {
         min-width: auto;
     }
     .chart-container {
-        height: 350px; 
+        height: 350px; /* Penyesuaian untuk layar kecil */
     }
 }
