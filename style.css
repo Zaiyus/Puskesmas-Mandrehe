@@ -36,6 +36,47 @@ body {
     line-height: 1.6;
 }
 
+/* Penambahan Style untuk Auth Section */
+.auth-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.auth-box {
+    background-color: var(--color-card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-medium);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.auth-box h3, .auth-box h4 {
+    color: var(--color-primary);
+    margin-bottom: 25px;
+    font-size: 1.6em;
+}
+
+#login-form input, #register-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #D5DBDB;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Kelas untuk menyembunyikan konten utama sebelum login */
+.content-hidden {
+    display: none !important;
+}
+
+/* Lanjutkan dengan style dashboard yang sudah ada */
 .header {
     background-color: var(--color-primary); 
     color: white;
@@ -43,7 +84,6 @@ body {
     text-align: center;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
     margin-bottom: 20px;
-    /* Animasikan Header juga */
     animation: fadeIn 0.8s ease-out forwards;
 }
 
