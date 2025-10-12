@@ -12,6 +12,10 @@ const NAMA_KLASTER = {
     5: "KLASTER 5: LINTAS KLASTER"
 };
 
+// [BARU] Konfigurasi lokasi data Global di Firestore
+const SHARED_COLLECTION = 'puskesmas_data'; // Koleksi khusus untuk data global aplikasi
+const SHARED_DOC_ID = 'indikator_data_master'; // Dokumen tunggal yang menyimpan semua data indikator
+
 let currentYear = new Date().getFullYear().toString();
 let currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
 let CURRENT_UNIT_TYPE = 'raw'; 
@@ -84,8 +88,8 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     errorDisplay.textContent = '';
 
     try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await initializeNewUser(userCredential.user.uid);
+        // Cukup buat user baru, data akan dimuat/diinisialisasi oleh loadDataFromFirestore
+        await auth.createUserWithEmailAndPassword(email, password); 
         // Otomatis auth.onAuthStateChanged akan menangani tampilan dashboard
     } catch (error) {
         console.error("Register Gagal:", error);
@@ -128,31 +132,24 @@ document.getElementById('btn-show-login').addEventListener('click', () => {
 });
 
 
-// Inisialisasi Data User Baru di Firestore
-async function initializeNewUser(uid) {
-    if (!uid) return;
-    try {
-        // Koleksi diatur ke 'puskesmas_users' di index.html
-        await db.collection(USER_COLLECTION).doc(uid).set({
-            indikatorData: INDIKATOR_DATA_DEFAULT,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    } catch (error) {
-        console.error("Gagal inisialisasi data user baru:", error);
-    }
-}
-
-// Load Data dari Firestore
+// [REVISI] Load Data dari Firestore (Sekarang dari dokumen Global)
 async function loadDataFromFirestore() {
-    if (!CURRENT_USER_UID) return;
+    if (!CURRENT_USER_UID) return; // Harus login untuk mengakses
+
+    const docRef = db.collection(SHARED_COLLECTION).doc(SHARED_DOC_ID);
 
     try {
-        const doc = await db.collection(USER_COLLECTION).doc(CURRENT_USER_UID).get();
+        const doc = await docRef.get();
         if (doc.exists && doc.data().indikatorData) {
+            // Data Global ditemukan
             INDIKATOR_DATA = doc.data().indikatorData;
         } else {
-            // Jika dokumen tidak ada, inisialisasi data default
-            await initializeNewUser(CURRENT_USER_UID);
+            // Jika dokumen master belum ada (misal, pertama kali ada user yang login)
+            // Lakukan inisialisasi dengan data default di dokumen global
+            await docRef.set({
+                indikatorData: INDIKATOR_DATA_DEFAULT,
+                lastInitialized: firebase.firestore.FieldValue.serverTimestamp()
+            });
             INDIKATOR_DATA = INDIKATOR_DATA_DEFAULT;
         }
         
@@ -162,33 +159,30 @@ async function loadDataFromFirestore() {
         populateCapaianSelect();
 
     } catch (error) {
-        console.error("Gagal memuat data dari Firestore:", error);
+        console.error("Gagal memuat data dari Firestore (Global):", error);
     }
 }
 
-// Simpan Data ke Firestore
+// [REVISI] Simpan Data ke Firestore (Sekarang ke dokumen Global)
 async function saveDataToFirestore() {
     if (!CURRENT_USER_UID) return;
 
     try {
-        await db.collection(USER_COLLECTION).doc(CURRENT_USER_UID).update({
+        await db.collection(SHARED_COLLECTION).doc(SHARED_DOC_ID).update({
             indikatorData: INDIKATOR_DATA,
             lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
         });
     } catch (error) {
-        console.error("Gagal menyimpan data ke Firestore:", error);
+        console.error("Gagal menyimpan data ke Firestore (Global):", error);
     }
 }
 
-
-// --- 3. FUNGSI DATA STORAGE & HELPER (Lanjutan Kode Lama Anda) ---
-// *******************************************************************
-// KODE DI BAWAH INI ADALAH LOGIKA APLIKASI UTAMA (PERHITUNGAN, CHART, TABEL)
-// *******************************************************************
+// --- FUNGSI DATA STORAGE & HELPER (TIDAK BERUBAH) ---
 
 function getIndicatorById(id) {
     return INDIKATOR_DATA.find(i => i.id === id);
 }
+// ... (Lanjutkan dengan semua fungsi lainnya: calculateCapaianValue, getCapaianForPeriod, getStatus, dst.)
 
 function calculateCapaianValue(numerator, denominator, satuan) {
     if (numerator === null) return null;
@@ -247,7 +241,7 @@ function convertValue(value, currentSatuan) {
 }
 
 
-// --- 4. FUNGSI KONTROL PERIODE DAN SATUAN ---
+// --- 4. FUNGSI KONTROL PERIODE DAN SATUAN (TIDAK BERUBAH) ---
 
 function initPeriodControls() {
     const selectTahun = document.getElementById('select-tahun');
@@ -306,7 +300,7 @@ function changeUnitType() {
 }
 
 
-// --- 5. FUNGSI RENDERING UI ---
+// --- 5. FUNGSI RENDERING UI (TIDAK BERUBAH) ---
 
 function renderKlasterSummary() {
     const cardsContainer = document.getElementById('summary-cards');
