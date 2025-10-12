@@ -19,64 +19,123 @@
     --transition-speed: 0.3s;
 }
 
-/* Base Style */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ==============================================
+   ANIMASI ENTRANCE HALUS (FIGMA-LIKE)
+   ============================================== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    line-height: 1.6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: var(--color-background);
     color: var(--color-text-dark);
+    line-height: 1.6;
 }
 
-.header {
-    background-color: var(--color-primary);
-    color: var(--color-text-light);
-    padding: 25px 5%;
-    text-align: center;
+/* Penambahan Style untuk Auth Section */
+.auth-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 20px;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.auth-box {
+    background-color: var(--color-card-bg);
+    padding: 40px;
+    border-radius: 15px;
     box-shadow: var(--shadow-medium);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.auth-box h3, .auth-box h4 {
+    color: var(--color-primary);
+    margin-bottom: 25px;
+    font-size: 1.6em;
+}
+
+#login-form input, #register-form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #D5DBDB;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Kelas untuk menyembunyikan konten utama sebelum login */
+.content-hidden {
+    display: none !important;
+}
+
+/* Lanjutkan dengan style dashboard yang sudah ada */
+.header {
+    background-color: var(--color-primary); 
+    color: white;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    margin-bottom: 20px;
+    animation: fadeIn 0.8s ease-out forwards;
 }
 
 .header h1 {
-    font-weight: 700;
     margin-bottom: 5px;
-    font-size: 2.2em;
+    font-size: 2.5em;
+    font-weight: 600; 
 }
 
 .header p {
-    font-weight: 300;
-    font-size: 0.9em;
-    opacity: 0.8;
+    margin-top: 5px;
+    font-size: 1.1em;
+    opacity: 0.9;
 }
 
 .container {
-    max-width: 1300px;
-    margin: 30px auto;
-    padding: 0 20px;
+    padding: 0 20px 40px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-h2, h3 {
-    color: var(--color-primary);
-    border-left: 5px solid var(--color-secondary);
-    padding-left: 10px;
-    margin-bottom: 20px;
+/* Penerapan Animasi Staggered pada Konten Utama */
+.controls-bar, 
+.add-indicator-form, 
+#summary-cards, 
+.detail-container, 
+.data-table-container {
+    animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    opacity: 0; 
 }
 
-/* Controls Bar */
+/* Penundaan (Delay) untuk efek berurutan */
+.controls-bar { animation-delay: 0.2s; }
+.add-indicator-form { animation-delay: 0.4s; }
+#summary-cards { animation-delay: 0.6s; }
+.detail-container { animation-delay: 0.8s; }
+.data-table-container { animation-delay: 1s; }
+
+
+/* Controls Bar (Filter) */
 .controls-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
     background-color: var(--color-card-bg);
-    padding: 15px 20px;
+    padding: 20px;
+    margin-bottom: 30px;
     border-radius: 12px;
-    box-shadow: var(--shadow-light);
-    margin-bottom: 25px;
+    box-shadow: var(--shadow-light); 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+    border-left: 6px solid var(--color-secondary);
 }
 
 .control-group {
@@ -87,308 +146,398 @@ h2, h3 {
 
 .controls-bar label {
     font-weight: 600;
-    color: var(--color-text-medium);
+    color: var(--color-primary);
+    font-size: 0.95em;
 }
 
+/* Komponen Select/Input: Focus State */
 .controls-bar select {
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
     border: 1px solid #D5DBDB;
-    background-color: #F9FBFC;
-    cursor: pointer;
-    transition: border-color var(--transition-speed);
+    font-size: 1em;
+    background-color: #FDFEFE;
+    transition: all var(--transition-speed);
+    -webkit-appearance: none; /* Bersihkan style default browser */
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .controls-bar select:focus {
     border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); /* Ring Fokus Khas Figma */
     outline: none;
 }
 
-/* Summary Cards */
+/* Current Period Display */
+.current-period-display {
+    text-align: right;
+    margin-bottom: 25px;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--color-primary);
+}
+
+.display-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 25px;
+    background-color: var(--color-secondary);
+    color: white;
+    font-weight: 700;
+    margin-left: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
+}
+
+.target-badge {
+    background-color: #F4D03F; 
+    color: var(--color-text-dark);
+}
+
+/* Form Input & Kelola */
+.add-indicator-form {
+    background-color: var(--color-card-bg);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 40px; 
+}
+
+.add-indicator-form h3, .add-indicator-form h4 {
+    color: var(--color-primary);
+    border-bottom: 3px solid var(--color-secondary);
+    padding-bottom: 10px;
+    margin-top: 0;
+    font-weight: 600;
+    font-size: 1.4em;
+    margin-bottom: 20px;
+}
+
+.form-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #ECF0F1;
+    border-radius: 10px;
+    background-color: #FAFAFA;
+}
+
+#capaian-form, #new-indicator-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Input/Select dalam Form */
+#capaian-form select, #capaian-form input, 
+#new-indicator-form input, #new-indicator-form select {
+    flex-grow: 1;
+    min-width: 150px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #D5DBDB;
+    background-color: #FDFEFE;
+    font-size: 1em;
+    transition: all var(--transition-speed);
+}
+
+/* Focus State untuk Input Form */
+#capaian-form input:focus, #new-indicator-form input:focus,
+#capaian-form select:focus, #new-indicator-form select:focus {
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3); 
+    outline: none;
+}
+
+/* Button Styling: Hover and Active State */
+.btn-primary {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    font-weight: 600;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px); /* Lift saat hover */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary:active {
+    transform: translateY(0); /* Press effect */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    filter: brightness(0.9);
+}
+
+/* Summary Cards (KPI Klaster) */
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 25px;
-    margin-bottom: 30px;
+    margin-bottom: 40px;
 }
 
 .card {
     background-color: var(--color-card-bg);
-    padding: 20px;
+    padding: 25px;
     border-radius: 15px;
     box-shadow: var(--shadow-light);
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+    transition: transform var(--transition-speed) ease-out, box-shadow var(--transition-speed) ease-out; 
     cursor: pointer;
-    border: 1px solid transparent;
+    border-left: 8px solid; 
 }
 
+/* Card Hover Effect: Lebih halus dan terdefinisi */
 .card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-medium);
-    border-color: var(--color-secondary);
+    transform: translateY(-5px); 
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15); /* Shadow lebih kuat saat hover */
 }
 
-.card h4 {
+.card-title {
+    font-size: 1.15em;
+    font-weight: bold;
+    margin-bottom: 12px;
     color: var(--color-primary);
-    font-size: 1.1em;
-    margin-bottom: 10px;
-    border-left: 3px solid var(--color-info);
-    padding-left: 8px;
-    font-weight: 600;
+    border-bottom: 1px dashed #ECF0F1;
+    padding-bottom: 8px;
 }
 
 .card-value {
     font-size: 2.5em;
     font-weight: 800;
-    margin-bottom: 5px;
-    transition: color var(--transition-speed);
+    margin-bottom: 15px;
 }
 
-.card-detail {
+.card-target {
     font-size: 0.9em;
     color: var(--color-text-medium);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
 }
 
 /* Status Colors */
-.status-poor { color: var(--color-danger); }
-.status-good { color: var(--color-warning); }
-.status-excellent { color: var(--color-success); }
-.status-average { color: var(--color-info); }
-.status-unknown { color: var(--color-text-medium); }
+.status-excellent { border-color: var(--color-success); } 
+.status-good { border-color: var(--color-warning); }    
+.status-poor { border-color: var(--color-danger); }     
 
+.status-excellent .card-value { color: var(--color-success); }
+.status-good .card-value { color: var(--color-warning); }
+.status-poor .card-value { color: var(--color-danger); }
 
-/* Input Forms Section */
-.input-form-section {
+/* Detail Chart Area */
+.detail-container {
     background-color: var(--color-card-bg);
-    padding: 20px;
+    padding: 30px;
     border-radius: 15px;
-    box-shadow: var(--shadow-light);
-    margin-bottom: 25px;
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 40px;
 }
 
-.input-form-section .form-title {
+.detail-container h2 {
+    color: var(--color-primary);
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #EAECEE;
+    padding-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 1.8em;
+}
+
+.chart-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
 }
 
-.input-form-section h2 {
-    margin-bottom: 0;
-}
-
-#capaian-form, #add-indicator-form {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-}
-
-.input-group {
-    display: flex;
-    flex-direction: column;
-    flex-basis: 200px; 
-    flex-grow: 1;
-}
-
-.input-group label {
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: var(--color-text-dark);
-}
-
-.input-group input, .input-group select {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #D5DBDB;
-    background-color: #FFFFFF;
-}
-
-.input-group-small > div {
-    flex-grow: 1;
-    min-width: 100px;
-}
-
-/* Buttons */
-.btn-primary {
+/* TOMBOL DOWNLOAD PNG */
+.btn-png {
+    background-color: var(--color-danger); 
+    font-size: 0.9em;
     padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--color-primary);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color var(--transition-speed), transform 0.1s, box-shadow 0.1s;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
 }
 
-.btn-primary:hover {
-    filter: brightness(1.1);
+.btn-png:hover {
+    background-color: #C0392B;
+}
+.btn-png:active {
+    transform: translateY(0);
+    filter: brightness(0.9);
 }
 
-.btn-primary:active {
-    transform: translateY(1px);
-    box-shadow: none;
-}
-
-/* Badges */
-.display-badge {
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 0.85em;
-    font-weight: 600;
-}
-
-.status-badge {
-    background-color: var(--color-text-medium);
-    color: white;
-}
-
-.status-badge.poor { background-color: var(--color-danger); }
-.status-badge.good { background-color: var(--color-warning); color: var(--color-primary); }
-.status-badge.excellent { background-color: var(--color-success); }
-
-.target-badge {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-
-/* Chart Section */
-.chart-section {
-    background-color: var(--color-card-bg);
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-medium);
-    margin-bottom: 30px;
-}
-
-.chart-section h2 {
-    margin-bottom: 15px;
-}
-
-.detail-info {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
+/* PERBAIKAN GRAFIK SEMPIT */
 .chart-container {
+    height: 550px; /* Ditingkatkan dari 500px */
+    margin-top: 20px;
+    padding: 0 15px; /* Tambahkan padding horizontal agar grafik bernapas */
     position: relative;
-    height: 450px;
-    width: 100%;
 }
 
-
-/* Data Table Section */
+/* Data Table */
 .data-table-container {
     background-color: var(--color-card-bg);
-    padding: 25px;
+    padding: 30px;
     border-radius: 15px;
-    box-shadow: var(--shadow-light);
+    box-shadow: var(--shadow-medium);
+    margin-bottom: 40px;
+    overflow-x: auto;
+    position: relative;
+}
+
+.data-table-container h3 {
+    color: var(--color-secondary);
+    margin-top: 0;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 1.5em;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 10px;
 }
 
 .table-controls {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+}
+
+.table-controls label {
     font-weight: 600;
+    color: var(--color-primary);
 }
 
 #data-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 8px;
+    border-spacing: 0;
+    min-width: 1300px;
 }
 
-#data-table thead th {
-    background-color: var(--color-primary);
-    color: white;
-    padding: 12px;
+#data-table th, #data-table td {
+    border: none;
+    border-bottom: 1px solid #EAECEE;
+    padding: 15px 12px;
     text-align: left;
-    font-weight: 600;
+    vertical-align: middle;
+}
+
+#data-table th {
+    background-color: #F4F6F6; 
+    font-weight: 700;
+    color: var(--color-primary);
     position: sticky;
     top: 0;
     z-index: 10;
 }
 
-#data-table thead th:first-child { border-top-left-radius: 8px; }
-#data-table thead th:last-child { border-top-right-radius: 8px; }
+/* Rounded corners for thead */
+#data-table thead th:first-child { border-top-left-radius: 10px; }
+#data-table thead th:last-child { border-top-right-radius: 10px; }
 
+/* Table Hover Effect */
 #data-table tbody tr {
-    background-color: #FDFEFE;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: background-color var(--transition-speed);
+    transition: background-color 0.2s;
 }
 
 #data-table tbody tr:hover {
-    background-color: #F0F3F4;
+    background-color: #FDFEFE;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-#data-table td {
-    padding: 12px;
-    border: none;
-    vertical-align: middle;
-}
-
-#data-table tbody tr:first-child td:first-child { border-top-left-radius: 8px; }
-#data-table tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
-
-#data-table td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-#data-table td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
-
-
-/* Editable Cells */
+/* Edit In-line Styles (Focus/Component State) */
 .editable-cell {
-    background-color: white;
-    cursor: pointer;
-    transition: background-color 0.1s;
-    border: 1px solid #EBEDEF;
-    border-radius: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    min-height: 20px; 
 }
 
-.editable-cell:hover {
-    background-color: #ECF0F1;
+.editable-cell[contenteditable="true"] {
+    background-color: #FEFEFE;
+    border: 1px solid var(--color-secondary);
+    outline: none;
+    box-shadow: 0 0 5px rgba(26, 188, 156, 0.2);
 }
 
 .editable-input, .editable-select {
     width: 100%;
-    padding: 5px;
-    border: 1px solid var(--color-info);
-    border-radius: 4px;
     box-sizing: border-box;
-    font-family: inherit;
-    font-size: inherit;
+    border: 1px solid #D5DBDB;
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 1em;
+    transition: border-color 0.2s;
+    outline: none; /* Hilangkan outline default */
 }
 
-/* Action Buttons in Table */
+.editable-input:focus, .editable-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.2); /* Ring Fokus yang serasi */
+}
+
+/* MODIFIKASI: Stacking input untuk Num/Den di Tabel */
+.capaian-edit-cell .editable-input {
+    display: block; 
+    margin-bottom: 5px; 
+}
+
+.inline-capaian-display {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9em;
+    color: white;
+    display: inline-block; 
+    margin-top: 8px; 
+    text-align: center;
+}
+.status-excellent .inline-capaian-display { background-color: var(--color-success); }
+.status-good .inline-capaian-display { background-color: var(--color-warning); }
+.status-poor .inline-capaian-display { background-color: var(--color-danger); }
+
+
+/* Aksi Buttons (Warna Solid dan Konsisten) */
 #data-table td:last-child {
     display: flex;
-    gap: 8px;
-    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap; 
+    justify-content: flex-start;
 }
 
-.btn-trend, .btn-move, .btn-delete {
+#data-table button {
     padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     color: white;
     cursor: pointer;
-    transition: all 0.15s;
     font-size: 0.9em;
+    font-weight: 600;
+    transition: all var(--transition-speed);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-trend { background-color: var(--color-info); }
-.btn-move { background-color: var(--color-purple); }
+/* Definisi Warna Tombol Aksi */
+.btn-trend { background-color: var(--color-info); } 
+.btn-move { background-color: var(--color-purple); } 
 .btn-delete { background-color: var(--color-danger); }
 
+/* Hover/Active State untuk Tombol Aksi */
 .btn-trend:hover, .btn-move:hover, .btn-delete:hover {
     filter: brightness(1.1);
+    transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -396,108 +545,6 @@ h2, h3 {
     transform: translateY(0);
     filter: brightness(0.9);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Modals */
-.modal {
-    display: none; 
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-    padding-top: 50px;
-}
-
-.modal-content {
-    background-color: var(--color-card-bg);
-    margin: 5% auto;
-    padding: 30px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-medium);
-    width: 90%;
-    max-width: 600px;
-    position: relative;
-}
-
-.modal-content h4 {
-    margin-top: 0;
-    color: var(--color-primary);
-    font-size: 1.3em;
-}
-
-.close-btn {
-    color: var(--color-danger);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    position: absolute;
-    top: 15px;
-    right: 25px;
-}
-
-#trend-table {
-    width: 100%;
-    margin-top: 20px;
-}
-
-#trend-table th, #trend-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #EBEDEF;
-}
-
-#trend-table thead th {
-    background-color: var(--color-primary);
-    color: white;
-}
-
-/* --- Tambahan Style untuk Otentikasi --- */
-/* Class untuk menyembunyikan/menampilkan konten */
-.content-hidden {
-    display: none !important;
-}
-
-.auth-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 70vh; /* Agar berada di tengah layar */
-    background-color: var(--color-background);
-}
-
-.auth-box {
-    background-color: var(--color-card-bg);
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-medium);
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-}
-
-.auth-box h3, .auth-box h4 {
-    color: var(--color-primary);
-    margin-bottom: 25px;
-    font-size: 1.5em;
-}
-
-#login-form input, #register-form input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #D5DBDB;
-    box-sizing: border-box;
-}
-
-#login-form button, #register-form button {
-    width: 100%;
-    margin-top: 5px;
 }
 
 /* MEDIA QUERIES for Responsiveness */
@@ -534,36 +581,27 @@ h2, h3 {
     .control-group {
         justify-content: space-between;
     }
-    .input-form-section h2 {
-        font-size: 1.3em;
+    .controls-bar select {
+        flex-grow: 1;
     }
-    .input-form-section .form-title {
-        flex-direction: column;
-        align-items: flex-start;
+    .card {
+        padding: 20px;
     }
-    #capaian-form, #add-indicator-form {
+    .detail-container, .data-table-container, .add-indicator-form {
+        padding: 20px;
+    }
+    
+    #capaian-form, #new-indicator-form {
         flex-direction: column;
         gap: 10px;
-        align-items: stretch;
     }
-    .input-group, .input-group-small > div {
-        flex-basis: auto;
-    }
-    .input-form-section button {
+    #capaian-form select, #capaian-form input, 
+    #new-indicator-form input, #new-indicator-form select,
+    .btn-primary {
         width: 100%;
-        margin-top: 10px;
-    }
-    .summary-cards {
-        grid-template-columns: 1fr;
+        min-width: auto;
     }
     .chart-container {
-        height: 300px;
-    }
-    .detail-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .auth-box {
-        padding: 20px;
+        height: 350px; /* Penyesuaian untuk layar kecil */
     }
 }
