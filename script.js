@@ -34,6 +34,15 @@ const DIRECTION_OPTIONS = `
     <option value="lower">Rendah Baik (↓)</option>
 `;
 
+// OPSI KLASTER LENGKAP untuk dropdown Pindah Klaster
+const KLASTER_OPTIONS = `
+    <option value="1">Klaster 1</option>
+    <option value="2">Klaster 2</option>
+    <option value="3">Klaster 3</option>
+    <option value="4">Klaster 4</option>
+    <option value="5">Klaster 5</option>
+`;
+
 const generateId = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '_').substring(0, 30) + '_' + Date.now();
 
 let INDIKATOR_DATA_DEFAULT = [
@@ -323,12 +332,13 @@ function renderKlasterSummary() {
 
     for (const klasterId in klasterData) {
         const data = klasterData[klasterId];
-        const statusText = data.excellent === data.total ? 'excellent' : data.excellent > data.poor ? 'good' : 'poor';
+        // Logika untuk menentukan status klaster: excellent jika semua excellent, poor jika poor > excellent, good sisanya
+        const statusText = data.total === 0 ? '' : data.excellent === data.total ? 'excellent' : data.excellent > data.poor ? 'good' : 'poor';
         const card = document.createElement('div');
         card.className = `card status-${statusText}`;
         card.innerHTML = `
-            <div class="card-title">${NAMA_KLASTER[klasterId]}</div>
-            <div class="card-value">${data.excellent}/${data.total}</div>
+            <div class="card-title">${NAMA_KLASTER[klasterId] || `KLASTER ${klasterId}`}</div>
+            <div class="card-value">${data.total === 0 ? 'N/A' : `${data.excellent}/${data.total}`}</div>
             <div class="card-target">
                 <span>Excellent: ${data.excellent}</span>
                 <span>Good: ${data.good}</span>
@@ -371,6 +381,10 @@ function renderDetailTable() {
         const capaianDisplay = capaian.value !== null ? `${capaian.value.toLocaleString('id-ID')}${indikator.satuan}` : 'N/A';
         const rawNum = capaian.numerator !== null ? capaian.numerator : '';
         const rawDen = capaian.denominator !== null ? capaian.denominator : '';
+        
+        // Buat opsi klaster, kecualikan klaster saat ini
+        const moveKlasterOptions = KLASTER_OPTIONS.replace(`value="${indikator.klaster}"`, `value="${indikator.klaster}" disabled`);
+
 
         const row = document.createElement('tr');
         row.dataset.indikatorId = indikator.id;
@@ -378,41 +392,55 @@ function renderDetailTable() {
         
         row.innerHTML = `
             <td class="klaster-id-cell" data-klaster-id="${indikator.klaster}">${indikator.klaster}</td>
-            <td class="editable-cell" data-field="indikator" contenteditable="true" onclick="updateIndicatorDetails('${indikator.id}')">${indikator.indikator}</td>
+            <td class="editable-cell" data-field="indikator" contenteditable="true" onblur="handleInlineEdit(event)" onclick="updateIndicatorDetails('${indikator.id}')">${indikator.indikator}</td>
             <td class="target-cell">
-                <input type="number" class="editable-input" value="${indikator.target}" step="0.01" data-field="target">
+                <input type="number" class="editable-input" value="${indikator.target}" step="0.01" data-field="target" onchange="handleInlineEdit(event)">
             </td>
             <td class="satuan-cell">
-                <select class="editable-select" data-field="satuan">
+                <select class="editable-select" data-field="satuan" onchange="handleInlineEdit(event)">
                     ${SATUAN_OPTIONS.replace(`value="${indikator.satuan}"`, `value="${indikator.satuan}" selected`)}
                 </select>
             </td>
             <td class="direction-cell">
-                <select class="editable-select" data-field="target_direction">
+                <select class="editable-select" data-field="target_direction" onchange="handleInlineEdit(event)">
                     ${DIRECTION_OPTIONS.replace(`value="${indikator.target_direction}"`, `value="${indikator.target_direction}" selected`)}
                 </select>
             </td>
             <td class="capaian-edit-cell">
-                <input type="number" class="editable-input" placeholder="Pembilang" value="${rawNum}" step="0.01" data-field="numerator">
-                <input type="number" class="editable-input" placeholder="Penyebut" value="${rawDen}" step="0.01" data-field="denominator">
+                <input type="number" class="editable-input" placeholder="Pembilang" value="${rawNum}" step="0.01" data-field="numerator" onchange="handleInlineEdit(event)">
+                <input type="number" class="editable-input" placeholder="Penyebut" value="${rawDen}" step="0.01" data-field="denominator" onchange="handleInlineEdit(event)">
                 <span class="inline-capaian-display status-${status}">${capaianDisplay}</span>
             </td>
             <td>
                 <button class="btn-trend" onclick="renderDetailChart('${indikator.id}', currentYear)"><i class="fas fa-chart-line"></i> Grafik</button>
+                <div class="action-group">
+                    <select id="select-move-klaster-${indikator.id}" data-indikator-id="${indikator.id}">
+                        <option value="" disabled selected>Pindah ke...</option>
+                        ${moveKlasterOptions}
+                    </select>
+                    <button class="btn-move" onclick="
+                        const selectElement = document.getElementById('select-move-klaster-${indikator.id}');
+                        const newKlaster = selectElement.value;
+                        if(newKlaster) {
+                            moveIndikatorToKlaster('${indikator.id}', parseInt(newKlaster));
+                        } else {
+                            alert('Pilih klaster tujuan terlebih dahulu.');
+                        }
+                    "><i class="fas fa-arrow-right"></i> Pindah</button>
+                </div>
                 <button class="btn-delete" onclick="deleteIndikator('${indikator.id}')"><i class="fas fa-trash"></i> Hapus</button>
             </td>
         `;
         tbody.appendChild(row);
     });
     
-    // Tambahkan event listener untuk input dan select di tabel
-    tbody.querySelectorAll('.editable-input, .editable-select').forEach(element => {
-        element.addEventListener('change', handleInlineEdit);
-        if (element.contentEditable === 'true') {
-             element.addEventListener('blur', handleInlineEdit);
-        }
-    });
-
+    // Hapus event listener tambahan karena sudah ditambahkan in-line
+    // tbody.querySelectorAll('.editable-input, .editable-select').forEach(element => {
+    //     element.addEventListener('change', handleInlineEdit);
+    //     if (element.contentEditable === 'true') {
+    //          element.addEventListener('blur', handleInlineEdit);
+    //     }
+    // });
 }
 
 function handleInlineEdit(event) {
@@ -457,6 +485,7 @@ function updateCapaian(indikatorId, numerator, denominator) {
     const indikator = getIndicatorById(indikatorId);
     if (!indikator) return;
     
+    if (!indikator.history) indikator.history = {}; // Pastikan history ada
     if (!indikator.history[currentYear]) {
         indikator.history[currentYear] = {};
     }
@@ -564,6 +593,27 @@ function deleteIndikator(id) {
         }
     }
 }
+
+// FUNGSI BARU UNTUK MEMINDAHKAN KLASTER
+function moveIndikatorToKlaster(indikatorId, newKlasterId) {
+    const indikator = getIndicatorById(indikatorId);
+    if (!indikator) {
+        alert("Indikator tidak ditemukan.");
+        return;
+    }
+    
+    const oldKlasterName = NAMA_KLASTER[indikator.klaster];
+    const newKlasterName = NAMA_KLASTER[newKlasterId];
+
+    if (confirm(`Yakin ingin memindahkan indikator "${indikator.indikator}" dari ${oldKlasterName} ke ${newKlasterName}?`)) {
+        indikator.klaster = newKlasterId;
+        saveDataToFirestore();
+        renderKlasterSummary();
+        renderDetailTable(); // Render ulang tabel untuk mencerminkan perubahan
+        alert(`Indikator berhasil dipindahkan ke ${newKlasterName}.`);
+    }
+}
+
 
 function populateCapaianSelect() {
     const select = document.getElementById('select-indikator-capaian');
