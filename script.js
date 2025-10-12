@@ -354,28 +354,32 @@ function renderDetailTable() {
     tableBody.innerHTML = '';
     const filterKlaster = document.getElementById('filter-klaster-table').value;
 
+    // Sortir INDIKATOR_DATA berdasarkan nomor klaster sebelum filter
+    INDIKATOR_DATA.sort((a, b) => a.klaster - b.klaster);
+
     const filteredData = INDIKATOR_DATA.filter(indikator => {
         return filterKlaster === '0' || indikator.klaster.toString() === filterKlaster;
     });
     
-    // Tambahkan header tabel
+    // Tambahkan header tabel, termasuk kolom Nomor Urut (No)
     tableBody.innerHTML = `
         <thead>
             <tr>
+                <th style="width: 3%;">No</th>
                 <th style="width: 5%;">Klaster</th>
                 <th style="width: 25%;">Indikator Kinerja</th>
                 <th style="width: 10%;">Target</th>
                 <th style="width: 8%;">Satuan</th>
                 <th style="width: 8%;">Arah Target</th>
                 <th style="width: 15%;">Capaian (${NAMA_BULAN[parseInt(currentMonth) - 1]})</th>
-                <th style="width: 29%;">Aksi</th>
+                <th style="width: 26%;">Aksi</th>
             </tr>
         </thead>
         <tbody></tbody>
     `;
     const tbody = tableBody.querySelector('tbody');
 
-    filteredData.forEach(indikator => {
+    filteredData.forEach((indikator, index) => { // Tambahkan index untuk Nomor Urut
         const capaian = getCapaianForPeriod(indikator.id, currentYear, currentMonth);
         const status = getStatus(capaian.value, indikator.target, indikator.target_direction);
         const capaianDisplay = capaian.value !== null ? `${capaian.value.toLocaleString('id-ID')}${indikator.satuan}` : 'N/A';
@@ -385,13 +389,12 @@ function renderDetailTable() {
         // Buat opsi klaster, kecualikan klaster saat ini
         const moveKlasterOptions = KLASTER_OPTIONS.replace(`value="${indikator.klaster}"`, `value="${indikator.klaster}" disabled`);
 
-
         const row = document.createElement('tr');
         row.dataset.indikatorId = indikator.id;
         row.className = `status-${status}`;
         
         row.innerHTML = `
-            <td class="klaster-id-cell" data-klaster-id="${indikator.klaster}">${indikator.klaster}</td>
+            <td>${index + 1}</td> <td class="klaster-id-cell" data-klaster-id="${indikator.klaster}">${indikator.klaster}</td>
             <td class="editable-cell" data-field="indikator" contenteditable="true" onblur="handleInlineEdit(event)" onclick="updateIndicatorDetails('${indikator.id}')">${indikator.indikator}</td>
             <td class="target-cell">
                 <input type="number" class="editable-input" value="${indikator.target}" step="0.01" data-field="target" onchange="handleInlineEdit(event)">
@@ -433,14 +436,6 @@ function renderDetailTable() {
         `;
         tbody.appendChild(row);
     });
-    
-    // Hapus event listener tambahan karena sudah ditambahkan in-line
-    // tbody.querySelectorAll('.editable-input, .editable-select').forEach(element => {
-    //     element.addEventListener('change', handleInlineEdit);
-    //     if (element.contentEditable === 'true') {
-    //          element.addEventListener('blur', handleInlineEdit);
-    //     }
-    // });
 }
 
 function handleInlineEdit(event) {
@@ -608,8 +603,11 @@ function moveIndikatorToKlaster(indikatorId, newKlasterId) {
     if (confirm(`Yakin ingin memindahkan indikator "${indikator.indikator}" dari ${oldKlasterName} ke ${newKlasterName}?`)) {
         indikator.klaster = newKlasterId;
         saveDataToFirestore();
+        
+        // Memanggil semua render agar tabel dan summary terupdate, termasuk nomor urut
         renderKlasterSummary();
-        renderDetailTable(); // Render ulang tabel untuk mencerminkan perubahan
+        renderDetailTable(); 
+        
         alert(`Indikator berhasil dipindahkan ke ${newKlasterName}.`);
     }
 }
