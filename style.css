@@ -517,6 +517,31 @@ body {
     justify-content: flex-start;
 }
 
+/* ---------------------------------------------------- */
+/* Tambahkan style untuk container aksi (dropdown + tombol) */
+.action-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px; /* Spasi antar tombol aksi */
+}
+
+.action-group select {
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-purple);
+    font-size: 0.9em;
+    background-color: #FDFEFE;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    color: var(--color-primary);
+    font-weight: 500;
+    min-width: 110px;
+}
+
+/* ---------------------------------------------------- */
+
 #data-table button {
     padding: 8px 12px;
     border: none;
@@ -567,6 +592,14 @@ body {
     }
     .chart-container {
         height: 400px;
+    }
+    /* Responsiveness untuk grup aksi pindah */
+    .action-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .action-group select {
+        width: 100%;
     }
 }
 
