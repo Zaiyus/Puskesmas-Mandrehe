@@ -16,9 +16,6 @@ const NAMA_KLASTER = {
 const SHARED_COLLECTION = 'puskesmas_data'; // Koleksi khusus untuk data global aplikasi
 const SHARED_DOC_ID = 'indikator_data_master'; // Dokumen tunggal yang menyimpan semua data indikator
 
-// [TAMBAHAN BARU] Konfigurasi koleksi pengguna di Firestore
-const USER_COLLECTION = 'puskesmas_users'; // Koleksi khusus untuk status konfirmasi user
-
 let currentYear = new Date().getFullYear().toString();
 let currentMonth = (new Date().getMonth() + 1).toString().padStart(2, '0');
 let CURRENT_UNIT_TYPE = 'raw'; 
@@ -63,122 +60,44 @@ let INDIKATOR_DATA_DEFAULT = [
 
 // --- 2. FUNGSI FIREBASE (AUTHENTICATION & FIRESTORE) ---
 
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-
-// [A. REVISI KUNCI] Status Otentikasi Berubah (Gatekeeper Akses Dashboard)
-auth.onAuthStateChanged(async (user) => {
-    const authSection = document.getElementById('authSection');
-    const mainContainer = document.getElementById('mainContainer');
-    const logoutBtn = document.getElementById('logout-btn');
-    const authError = document.getElementById('auth-error');
-    
-    // Sembunyikan pesan kesalahan/status lama
-    authError.textContent = ''; 
-
+// Status Otentikasi Berubah (INI KUNCI UNTUK MENAMPILKAN/MENYEMBUNYIKAN DASHBOARD)
+auth.onAuthStateChanged(user => {
     if (user) {
+        // User telah Login
         CURRENT_USER_UID = user.uid;
-        authError.textContent = 'Memeriksa status akun...';
-        
-        try {
-            // KUNCI: Cek status user di koleksi puskesmas_users
-            const userDoc = await db.collection(USER_COLLECTION).doc(user.uid).get();
-            
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                
-                if (userData.status === 'active') {
-                    // ✅ User aktif: Berikan akses penuh ke dashboard
-                    authSection.style.display = 'none';
-                    mainContainer.classList.remove('content-hidden');
-                    logoutBtn.style.display = 'inline-block';
-                    authError.textContent = ''; // Hapus pesan status
-                    loadDataFromFirestore();
-                } else {
-                    // ⏳ User pending/rejected: Tahan di halaman auth TAPI biarkan mereka tetap login
-                    
-                    authSection.style.display = 'flex'; // Tampilkan form login/register
-                    mainContainer.classList.add('content-hidden'); // Sembunyikan dashboard
-                    // Jika register berhasil, tombol logout tetap muncul
-                    logoutBtn.style.display = 'inline-block'; 
-                    
-                    // Tampilkan pesan penolakan/pending
-                    if (userData.status === 'pending') {
-                        authError.textContent = "Akun Anda telah berhasil didaftarkan, namun masih menunggu konfirmasi/persetujuan dari Admin untuk mengakses dashboard.";
-                    } else if (userData.status === 'rejected') {
-                        authError.textContent = "Registrasi akun Anda telah ditolak oleh Admin. Silakan hubungi Admin untuk informasi lebih lanjut.";
-                    } else {
-                         authError.textContent = "Akun Anda tidak aktif. Silakan hubungi Admin.";
-                    }
-                    console.warn(`Akses dashboard ditolak untuk ${user.email}. Status: ${userData.status}`);
-                }
-            } else {
-                // Kasus anomali (User ada di Auth tapi tidak ada di Firestore). 
-                // Asumsikan mereka baru register tapi Firestore gagal, atau langsung blokir akses.
-                authSection.style.display = 'flex';
-                mainContainer.classList.add('content-hidden');
-                logoutBtn.style.display = 'inline-block';
-                authError.textContent = "Data pengguna tidak ditemukan di database. Silakan hubungi Admin.";
-            }
-
-        } catch (error) {
-            console.error("Gagal memeriksa status Firestore:", error);
-            authError.textContent = `Error: Gagal memuat status akun. ${error.message}`;
-            authSection.style.display = 'flex'; 
-            mainContainer.classList.add('content-hidden'); 
-            logoutBtn.style.display = 'inline-block'; 
-        }
-
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('mainContainer').classList.remove('content-hidden');
+        document.getElementById('logout-btn').style.display = 'inline-block';
+        loadDataFromFirestore(); // Load data dari Firestore setelah login
     } else {
         // User telah Logout
         CURRENT_USER_UID = null;
         INDIKATOR_DATA = [];
-        authSection.style.display = 'flex'; // Tampilkan form login
-        mainContainer.classList.add('content-hidden');
-        logoutBtn.style.display = 'none';
-        authError.textContent = ''; // Hapus pesan error/status
+        document.getElementById('authSection').style.display = 'flex'; // Tampilkan form login
+        document.getElementById('mainContainer').classList.add('content-hidden');
+        document.getElementById('logout-btn').style.display = 'none';
     }
 });
 
-
-// [B. REVISI KUNCI] Register Akun Baru (Menambahkan Status 'pending' ke Firestore)
+// Register Akun Baru
 document.getElementById('register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
     const errorDisplay = document.getElementById('auth-error');
-    errorDisplay.textContent = 'Memproses registrasi...';
+    errorDisplay.textContent = '';
 
     try {
-        // 1. Buat user di Firebase Auth
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password); 
-        const uid = userCredential.user.uid;
-
-        // 2. Simpan status user ke Firestore sebagai 'pending'
-        await db.collection(USER_COLLECTION).doc(uid).set({
-            email: email,
-            status: 'pending', // <-- Kunci: User baru berstatus pending
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        // 3. Login berhasil, biarkan auth.onAuthStateChanged yang memblokir akses ke dashboard
-        // Form register disembunyikan, tampilkan form login dengan pesan
-        document.getElementById('login-form').style.display = 'block';
-        document.getElementById('register-form').style.display = 'none';
-        errorDisplay.textContent = "Registrasi Berhasil! Anda sudah Login, namun harus menunggu konfirmasi Admin untuk mengakses dashboard.";
-        
-        // Bersihkan form
-        document.getElementById('register-email').value = '';
-        document.getElementById('register-password').value = '';
-
+        // Cukup buat user baru, data akan dimuat/diinisialisasi oleh loadDataFromFirestore
+        await auth.createUserWithEmailAndPassword(email, password); 
+        // Otomatis auth.onAuthStateChanged akan menangani tampilan dashboard
     } catch (error) {
         console.error("Register Gagal:", error);
         errorDisplay.textContent = `Register Gagal: ${error.message}`;
     }
 });
 
-// [C. TIDAK ADA PERUBAHAN] Login
+// Login
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -187,7 +106,6 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     errorDisplay.textContent = '';
 
     try {
-        // Hanya login. auth.onAuthStateChanged akan mengecek status dan memblokir akses dashboard jika pending.
         await auth.signInWithEmailAndPassword(email, password);
         // Otomatis auth.onAuthStateChanged akan menangani tampilan dashboard
     } catch (error) {
